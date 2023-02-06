@@ -6,14 +6,33 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IRepositoryWrapper, RepositoryWrapper>();
 builder.Services.AddDbContext<AppDbContext>(option =>
-option.UseMySql(builder.Configuration.GetConnectionString("MySqlConnection"), new MySqlServerVersion(new Version(8, 0, 31))));
+option.UseSqlServer(builder.Configuration["ConnectionStrings:DefaultConnection"]));
+builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
 builder.Services.AddAuthentication();
+builder.Services.AddAuthentication()
+   .AddGoogle(options =>
+   {
 
+	   options.ClientId = builder.Configuration["ExternalProviders:Google:ClientId"];
+	   options.ClientSecret = builder.Configuration["ExternalProviders:Google:ClientSecret"];
+   })
+   .AddFacebook(options =>
+   {
+
+	   options.ClientId = builder.Configuration["ExternalProviders:Facebook:ClientId"];
+	   options.ClientSecret = builder.Configuration["ExternalProviders:Facebook:ClientSecret"];
+   })
+   .AddTwitter(twitterOptions =>
+   {
+	   twitterOptions.ConsumerKey = builder.Configuration["ExternalProviders:Twitter:ConsumerKey"];
+	   twitterOptions.ConsumerSecret = builder.Configuration["ExternalProviders:Twitter:ConsumerSecret"];
+	   twitterOptions.RetrieveUserDetails = true;
+   });
 //Middleware
 var app = builder.Build();
 app.UseStaticFiles();
 app.UseRouting();
-
+app.UseAuthentication();
 app.MapControllerRoute(
     name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
 

@@ -1,0 +1,20 @@
+﻿@inject SignInManager<IdentityUser> _signInManager
+@{
+	var schemes = await _signInManager.GetExternalAuthenticationSchemesAsync();
+	var LoginProviders = schemes.ToList();
+}
+@if (LoginProviders.Count > 0)
+{
+
+	<div class="row" style="padding: 10px;">
+		@foreach (var p in LoginProviders)
+		{
+			var bgb = p.Name == "Facebook" ? "bg1" : p.Name == "Twitter" ? "bg2" : "bg3";
+					<form asp-controller="Account" asp-action="ExternalProvider" asp-route-provider="@p.Name" method="post">
+						<button type="submit" value="@p.Name" class="login100-social-item @bgb">
+							<i class="fa fa-@p.Name.ToLower()"></i>
+						</button>
+					</form>
+		}
+		</div>
+}
