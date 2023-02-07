@@ -3,12 +3,16 @@ using Online_Election_System.Data;
 var builder = WebApplication.CreateBuilder(args);
 
 //Add services to the container
+//Gets the Captcha section on appSettings.json and cast it on GoogleCaptchaConfig and inject it as an option
+builder.Services.Configure<GoogleCaptchaConfig>(builder.Configuration.GetSection("GoogleReCaptcha"));
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IRepositoryWrapper, RepositoryWrapper>();
 builder.Services.AddDbContext<AppDbContext>(option =>
 option.UseSqlServer(builder.Configuration["ConnectionStrings:DefaultConnection"]));
 builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
 builder.Services.AddAuthentication();
+
 builder.Services.AddAuthentication()
    .AddGoogle(options =>
    {
@@ -33,6 +37,8 @@ var app = builder.Build();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapControllerRoute(
     name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
 

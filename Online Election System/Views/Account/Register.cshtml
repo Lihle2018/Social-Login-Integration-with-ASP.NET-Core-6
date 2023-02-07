@@ -1,4 +1,5 @@
 ﻿@model RegisterViewModel
+@inject IOptions<GoogleCaptchaConfig> captchaConfig
 <section class="ftco-section">
 	<div class="container">
 		<div class="row justify-content-center">
@@ -25,18 +26,40 @@
 							<input asp-for="ConfirmPassword" type="password" class="form-control rounded-left" placeholder="Confirm password" required>
 						</div>
 						<div class="form-group">
-							<button type="submit" class="form-control btn btn-primary rounded submit px-3">Login</button>
+							<button type="submit" class="form-control btn btn-primary rounded submit px-3">Register</button>
 						</div>
 						<div class="form-group d-md-flex">
 							<div class="w-50">
 							</div>
 							<div class="w-50 text-md-right">
-								<a asp-action="Login" asp-controller="Account">Already have an account?</a>
+								<a asp-action="Register" asp-controller="Account">Already have an account?</a>
 							</div>
 						</div>
 					</form>
+					<div>
+						<h3 class="text-center mb-4">Or continue with</h3>
+						<partial name="_ExternalLoginProvidersPartial" />
+					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 </section>
+<script src="https://www.google.com/recaptcha/api.js?render=@captchaConfig.Value.SiteKey"></script>
+<script>
+	function getToken() {
+
+		grecaptcha.ready(function () {
+			grecaptcha.execute('@captchaConfig.Value.SiteKey', { action: 'submit' }).then(function (token) {
+				// Add your logic to submit to your backend server here.
+				console.log(token);
+				document.getElementById("ReCaptchaToken").value = token;
+			});
+		});
+	}
+	setInterval(getToken, 1500);
+	function onClick(e) {
+		e.preventDefault();
+		getToken();
+	}
+</script>

@@ -1,4 +1,5 @@
 ﻿@model LoginViewModel
+@inject IOptions<GoogleCaptchaConfig> captchaConfig
 <section class="ftco-section">
 	<div class="container">
 		<div class="row justify-content-center">
@@ -31,12 +32,30 @@
 							</div>
 						</div>
 					</form>
-				</div>
-				<div>
-					<h3 class="text-center mb-4">Or continue with</h3>
-					<partial name="_ExternalLoginProvidersPartial"/>
+					<div>
+						<h3 class="text-center mb-4">Or continue with</h3>
+						<partial name="_ExternalLoginProvidersPartial" />
+					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 </section>
+<script src="https://www.google.com/recaptcha/api.js?render=@captchaConfig.Value.SiteKey"></script>
+<script>
+		function getToken(){
+
+			grecaptcha.ready(function () {
+				grecaptcha.execute('@captchaConfig.Value.SiteKey', { action: 'submit' }).then(function (token) {
+					// Add your logic to submit to your backend server here.
+					console.log(token);
+					document.getElementById("ReCaptchaToken").value = token;
+				});
+		});
+	 }
+	setInterval(getToken,1500);
+		function onClick(e) {
+				e.preventDefault();
+				getToken();
+		}
+</script>
